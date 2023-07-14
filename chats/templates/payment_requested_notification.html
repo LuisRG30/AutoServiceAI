@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de Pago Solicitado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #108ee9;
+            font-size: 24px;
+            line-height: 32px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #333333;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notificación de Pago Solicitado</h1>
+        <p>Hola, {{user.first_name}},</p>
+        <p>Te informamos que se ha solicitado un pago para poder continuar con tu caso.</p>
+        <p>A continuación, se muestran los detalles de la solicitud:</p>
+        <ul style="text-align: left;">
+            <li><strong>Concepto:</strong>{{payment.description}}</li>
+            <li><strong>Monto a Pagar:</strong>{{payment.amount_cents / 100}} MXN</li>
+            <li><strong>Fecha:</strong>{{payment.created_at}}</li>
+            <li><strong>Id. del pago:</strong>{{payment.id}}</li>
+        </ul>
+        <p>Por favor, realiza el pago para avanzar cuanto antes.</p>
+        <p>Si tienes alguna pregunta o necesitas asistencia adicional, nuestro equipo de soporte está listo para ayudarte.</p>
+        <p>¡Gracias por utilizar nuestros servicios!</p>
+        <p>Saludos cordiales,</p>
+        <p>Tu Equipo de Soporte</p>
+    </div>
+</body>
+</html>

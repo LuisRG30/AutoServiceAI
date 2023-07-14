@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Subida Exitosa de Documento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #108ee9;
+            font-size: 24px;
+            line-height: 32px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #333333;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Subida Exitosa de Documento</h1>
+        <p>Hemos recibido el documento en la conversación con el usuario {{user.first_name}} {{user.last_name}} con correo electrónico {{user.email}}</p>
+        <p>A continuación, se muestran los detalles del documento:</p>
+        <ul style="text-align: left;">
+            <li><strong>Nombre del Documento:</strong>{{document.name}}</li>
+            <li><strong>Fecha de Subida:</strong>{{document.updated_at}}</li>
+        </ul>
+        <p>El documento ahora está disponible en tu cuenta. Si tienes alguna pregunta o necesitas asistencia adicional, nuestro equipo de soporte está listo para ayudarte.</p>
+        <p>Esta notificación también ha sido enviada al administrador del servicio.</p>
+    </div>
+</body>
+</html>
