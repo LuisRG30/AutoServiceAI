@@ -144,7 +144,7 @@ REDIS_HOST = env('REDIS_HOST')
 REDIS_PORT = env('REDIS_PORT')
 
 
-if env('REDIS_PASSWORD', default=False):
+if env('REDIS_PASSWORD'):
     REDIS_PASSWORD = env('REDIS_PASSWORD')
     REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}'
 else:
@@ -161,7 +161,7 @@ CHANNEL_LAYERS = {
 
 
 
-if env('DATABASE_PASSWORD', default=False):
+if env('DATABASE_PASSWORD'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
