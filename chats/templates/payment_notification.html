@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de Pago Recibido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #108ee9;
+            font-size: 24px;
+            line-height: 32px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #333333;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notificación de Pago Recibido</h1>
+        <p>Estimado Administrador,</p>
+        <p>Te informamos que se ha recibido un pago del usuario {{user.email}}:</p>
+        <ul style="text-align: left;">
+            <li><strong>Concepto:</strong>{{payment.description}}</li>
+            <li><strong>Monto Recibido:</strong>{{payment.amount_cents / 100}} MXN</li>
+            <li><strong>Fecha de Recepción:</strong>{{payment.date_paid}}</li>
+            <li><strong>Referencia de Pago:</strong>{{payment.id}}</li>
+        </ul>
+        <p>Por favor, verifica los detalles y realiza las actualizaciones necesarias en el sistema correspondiente.</p>
+        <p>Si tienes alguna pregunta o necesitas asistencia adicional, no dudes en contactar al equipo de soporte.</p>
+        <p>Gracias por tu atención.</p>
+    </div>
+</body>
+</html>

@@ -94,12 +94,15 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     admin = models.BooleanField(default=False)
     AI = models.BooleanField(default=False)
+    Anonymous = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self.AI:
             return "AI"
+        if not self.user.email:
+            return "My balls"
         return self.user.email
 
 def create_profile(sender, instance, created, **kwargs):
