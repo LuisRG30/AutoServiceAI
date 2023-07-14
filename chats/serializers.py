@@ -98,7 +98,7 @@ class IntegrationSerializer(serializers.ModelSerializer):
 class ConversationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     last_message = MessageSerializer(read_only=True)
-    integration = Integration(read_only=True)
+    integration = IntegrationSerializer(read_only=True)
     class Meta:
         model = Conversation
         fields = ('id', 'integration', 'user', 'name', 'status', 'archived', 'autopilot' ,'created_at', 'updated_at', 'assigned_to', 'last_message')
