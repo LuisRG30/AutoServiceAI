@@ -31,7 +31,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['14e7-187-190-197-56.ngrok-free.app', '127.0.0.1']
+ALLOWED_HOSTS = ["anotherai.azurewebsites.net"]
 
 
 # Application definition
