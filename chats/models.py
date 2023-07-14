@@ -12,8 +12,23 @@ STATUS_CHOICES = (
     ('resolved', 'Resuelto')
 )
 
+CHANNEL_CHOICES = (
+    ('integrated', 'Integrado'),
+    ('whatsapp', 'WhatsApp'),
+    ('telegram', 'Telegram'),
+    ('web', 'Web'),
+)
+
+class Integration(models.Model):
+    channel = models.CharField(max_length=255, choices=CHANNEL_CHOICES, default='integrated')
+    telegram_token = models.CharField(max_length=255, blank=True, null=True)
+    whatsapp_token = models.CharField(max_length=255, blank=True, null=True)
+    web_token = models.CharField(max_length=255, blank=True, null=True)
+
+
 class Conversation(models.Model):
     name = models.CharField(max_length=255)
+    integration = models.OneToOneField(Integration, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, related_name="conversation", blank=True, null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="assigned_conversations")
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='inactive')
