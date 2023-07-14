@@ -6,10 +6,12 @@ from asgiref.sync import async_to_sync
 
 from django.core.cache import cache
 
-from .models import Integration, Conversation, Message, Document, Payment
+from .models import Integration, Conversation, Message, Document, Payment, Profile
 from users.models import User
 from .serializers import MessageSerializer
-from .mail import send_message_notification, send_document_upload_notification, send_document_requested_notification, send_payment_requested_notification, send_new_conversation_notification_admins
+from .mail import send_message_notification, send_document_upload_notification, send_document_requested_notification, send_payment_requested_notification, send_new_conversation_notification_admins, send_conversation_autopilot_deactivated
+
+from my_gpt import get_my_ai_response
 
 from channels.generic.websocket import JsonWebsocketConsumer
 
@@ -118,6 +120,8 @@ class ChatConsumer(JsonWebsocketConsumer):
                 send_new_conversation_notification_admins(conversation)
         except Exception:
             pass
+    
+        
         
         async_to_sync(self.channel_layer.group_add)(
             self.conversation, self.channel_name
@@ -127,6 +131,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             "type": "last_messages",
             "messages": MessageSerializer(messages, many=True).data
         })
+
 
     def disconnect(self, code):
         return super().disconnect(code)
@@ -192,6 +197,39 @@ class ChatConsumer(JsonWebsocketConsumer):
                         "message": MessageSerializer(message).data,
                     },
                 )
+            if conversation.autopilot:
+                past_messages = Message.objects.filter(conversation=conversation).order_by('-created_at')[:settings.AI_CONTEXT_SIZE]
+                past_messages = past_messages[::-1]
+                past_messages = MessageSerializer(past_messages, many=True).data
+
+                try:
+                    ai_response = get_my_ai_response(past_messages)
+                    
+                    ai_user = Profile.objects.get(AI=True).user
+                    ai_message = Message.objects.create(
+                                        conversation=conversation,
+                                        from_user=ai_user,
+                                        message=ai_response,
+                                        read=False
+                                    )
+                    
+                    try:
+                        async_to_sync(self.channel_layer.group_send)(
+                            conversation.name,
+                            {
+                                'type': 'chat_message_echo',
+                                'sender': ai_user,
+                                'message': MessageSerializer(ai_message).data
+                            }
+                        )
+                    except Exception as e:
+                        print(e)
+                    
+                except Exception as e:
+                    conversation.autopilot = False
+                    conversation.save()
+                    send_conversation_autopilot_deactivated(conversation)
+
         return super().receive_json(content, **kwargs)
 
     def typing_echo(self, event):
