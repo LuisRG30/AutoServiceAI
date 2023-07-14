@@ -5,6 +5,7 @@ from urllib.parse import parse_qsl
 from asgiref.sync import async_to_sync
 
 from django.core.cache import cache
+from django.conf import settings
 
 from .models import Integration, Conversation, Message, Document, Payment, Profile
 from users.models import User
