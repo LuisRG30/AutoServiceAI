@@ -61,6 +61,7 @@ class ProfileView(APIView):
         data = ProfileSerializer(profile).data
         return Response(data, status=status.HTTP_200_OK)
     
+
 class RegisterChatView(APIView):
     permission_classes = [IsAuthenticated]
 
