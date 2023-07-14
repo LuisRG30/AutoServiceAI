@@ -100,6 +100,8 @@ class Profile(models.Model):
     def __str__(self):
         if self.AI:
             return "AI"
+        if not self.user.email:
+            return "My balls"
         return self.user.email
 
 def create_profile(sender, instance, created, **kwargs):

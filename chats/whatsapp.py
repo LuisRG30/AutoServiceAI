@@ -11,11 +11,11 @@ def send_whatsapp(phone_number, message):
     "Content-Type": "application/json",
     "Authorization": f"Bearer {ACCESS_TOKEN}"
   }
-
+  print(phone_number[:2] + phone_number[3:])
   json = {
     "messaging_product": "whatsapp",
     "recipient_type": "individual",
-    "to": str(phone_number),
+    "to": phone_number[:2] + phone_number[3:],
     "type": "text",
     "text": {"body": message,
              "preview_url": "true"},

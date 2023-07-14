@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Mensaje</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #108ee9;
+            font-size: 24px;
+            line-height: 32px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #333333;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nuevo Mensaje en Conversación sin Asignar</h1>
+        <p>{{ user.first_name}} {{user.last_name}} envió:</p>
+        <div style="text-align: left; background-color: #f5f9fd; padding: 20px;">
+            <p>{{message.message}}</p>
+        </div>
+        <p>Puedes acceder a todos los mensajes iniciando sesión en nuestra plataforma.</p>
+    </div>
+</body>
+</html>

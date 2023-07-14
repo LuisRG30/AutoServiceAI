@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Pago</title>
+</head>
+<body>
+    <table align="center" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+            <td align="center" bgcolor="#f0f0f0" style="padding: 40px 0 30px 0;">
+                <h1>Confirmación de Pago</h1>
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
+                <p>Hola, {user.first_name},</p>
+                <p>Gracias por tu pago. Nos complace informarte que hemos recibido tu pago exitosamente.</p>
+                <p>Detalles del Pago:</p>
+                <ul>
+                    <li>Fecha de Pago: {{payment.date_paid}}</li>
+                    <li>Concepto: {{payment.description}}</li>
+                    <li>Monto: {{payment.amount_cents / 100}} MXN</li>
+                    <li>Número de Transacción: {{payment.id}}</li>
+                </ul>
+                <p>Si tienes alguna pregunta o inquietud relacionada con tu pago, no dudes en ponerte en contacto con nuestro equipo de soporte en soporte@firmala.mx.</p>
+                <p>¡Gracias por tu confianza en nuestros servicios!</p>
+                <p>Saludos cordiales,</p>
+                <p>Tu Equipo de Soporte</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

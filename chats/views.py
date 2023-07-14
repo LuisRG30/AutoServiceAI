@@ -30,6 +30,8 @@ from .serializers import RegisterSerializer, UserSerializer, ProfileSerializer, 
 from .permissions import IsAdmin, IsAdminOrReadAuthenticated
 from .paginaters import MessagePagination
 from .my_gpt import get_my_ai_response
+from .whatsapp import send_whatsapp
+from .telegram import send_telegram
 from .mail import send_payment_success_mail, send_payment_notification_admins, send_document_upload_notification, send_conversation_assignment_notification, send_conversation_unassignment_notification, send_conversation_archive_change_notification, send_conversation_autopilot_deactivated
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -422,23 +424,45 @@ def whatsapp_webhook(request):
             data = json.loads(request.body)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if 'entry' not in data:
+            return Response({'error': 'Entry not found'}, status=status.HTTP_400_BAD_REQUEST)
+        
         entries = data['entry']
         for entry in entries:
+            if 'changes' not in entry:
+                return Response({'error': 'Changes not found'}, status=status.HTTP_400_BAD_REQUEST)
             changes = entry['changes']
             for change in changes:
-                messages = change['value']['messages']
+
+                if 'value' not in change:
+                    return Response({'error': 'Value not found'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                value = change['value']
+
+                if 'messages' not in value:
+                    return Response({'error': 'Messages not found'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                messages = value['messages']
+
                 for message in messages:
                     phone_number = message['from']
-                    whatsapp_integration = Integration.objects.get_or_create(channel='whatsapp')
 
                     try:
                         sender_user = User.objects.get(phone=phone_number)
                     except User.DoesNotExist:
                         sender_user = User.objects.create(phone=phone_number)
-                        
-                    conversation, created = Conversation.objects.get_or_create(name=phone_number,
-                                                                                integration=whatsapp_integration,
-                                                                                user=sender_user)
+
+                    whatsapp_integration, created = Integration.objects.get_or_create(channel='whatsapp')
+
+                    try:
+                        conversation = Conversation.objects.get(name=phone_number,
+                                                                integration__channel='whatsapp',
+                                                                user=sender_user)
+                    except Conversation.DoesNotExist:
+                        conversation = Conversation.objects.create(name=phone_number,
+                                                                    integration=whatsapp_integration,
+                                                                    user=sender_user)
                                                                                 
                     if conversation.integration.channel != 'whatsapp':
                         return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
@@ -470,7 +494,13 @@ def whatsapp_webhook(request):
                         past_messages = json.dumps(past_messages)
 
                         try:
-                            ai_response = get_my_ai_response(past_messages)
+                            try:
+                                ai_response = get_my_ai_response(past_messages)
+                            except Exception as e:
+                                print(e)
+
+                            send_whatsapp(phone_number, ai_response)
+                            
                             ai_user = Profile.objects.get(AI=True).user
                             ai_message = Message.objects.create(
                                                 conversation=conversation,
@@ -478,23 +508,115 @@ def whatsapp_webhook(request):
                                                 message=ai_response,
                                                 read=False
                                             )
+                            try:
+                                channel_layer = get_channel_layer()
+                                async_to_sync(channel_layer.group_send)(
+                                    conversation.name,
+                                    {
+                                        'type': 'chat_message_echo',
+                                        'sender': ai_user,
+                                        'message': MessageSerializer(ai_message).data
+                                    }
+                                )
+                            except Exception as e:
+                                print(e)
                             
                         except Exception as e:
                             conversation.autopilot = False
+                            try:
+                                send_whatsapp(phone_number, "Ay, me desactivaron el autopilot")
+                            except Exception as e:
+                                print(e)
+
                             conversation.save()
                             send_conversation_autopilot_deactivated(conversation)
-                        
-                        try:
-                            channel_layer = get_channel_layer()
-                            async_to_sync(channel_layer.group_send)(
-                                conversation.name,
-                                {
-                                    'type': 'chat_message_echo',
-                                    'sender': ai_user,
-                                    'message': MessageSerializer(ai_message).data
-                                }
-                            )
-                        except Exception as e:
-                            print(e)
                             
                     return Response({'success': True}, status=status.HTTP_200_OK)
+                
+@api_view(['POST', 'GET'])
+def telegram_webhook(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+        phone_number_id = data['message']['chat']['id']
+
+        try:
+            sender_user = User.objects.get(phone=phone_number_id)
+        except User.DoesNotExist:
+            sender_user = User.objects.create(phone=phone_number_id)
+
+        telegram_integration, created = Integration.objects.get_or_create(channel='telegram')
+
+        try:
+            conversation = Conversation.objects.get(name=phone_number_id,
+                                                    integration__channel='whatsapp',
+                                                    user=sender_user)
+        except Conversation.DoesNotExist:
+            conversation = Conversation.objects.create(name=phone_number_id,
+                                                        integration=telegram_integration,
+                                                        user=sender_user)
+                                                                    
+        if conversation.integration.channel != 'telegram':
+            return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
+        
+        new_message = Message.objects.create(
+                            conversation=conversation,
+                            from_user=conversation.user,
+                            message=data['message']['text'],
+                            read=False
+                        )
+        
+        try:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                conversation.name,
+                {
+                    'type': 'chat_message_echo',
+                    'sender': new_message.from_user.phone,
+                    'message': MessageSerializer(new_message).data
+                }
+            )
+        except Exception as e:
+            print(e)
+
+        if conversation.autopilot:
+            past_messages = Message.objects.filter(conversation=conversation).order_by('-created_at')[:settings.AI_CONTEXT_SIZE]
+            past_messages = past_messages[::-1]
+            past_messages = MessageSerializer(past_messages, many=True).data
+            past_messages = json.dumps(past_messages)
+
+            try:
+                ai_response = get_my_ai_response(past_messages)
+                send_telegram(phone_number_id, ai_response)
+                
+                ai_user = Profile.objects.get(AI=True).user
+                ai_message = Message.objects.create(
+                                    conversation=conversation,
+                                    from_user=ai_user,
+                                    message=ai_response,
+                                    read=False
+                                )
+                
+                try:
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        conversation.name,
+                        {
+                            'type': 'chat_message_echo',
+                            'sender': ai_user,
+                            'message': MessageSerializer(ai_message).data
+                        }
+                    )
+                except Exception as e:
+                    print(e)
+                
+            except Exception as e:
+                conversation.autopilot = False
+                conversation.save()
+                send_conversation_autopilot_deactivated(conversation)
+                
+        return Response({'success': True}, status=status.HTTP_200_OK)
