@@ -144,7 +144,7 @@ REDIS_HOST = env('REDIS_HOST')
 REDIS_PORT = env('REDIS_PORT')
 
 
-if env('REDIS_PASSWORD', default=False):
+if env('REDIS_PASSWORD'):
     REDIS_PASSWORD = env('REDIS_PASSWORD')
     REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}'
 else:
@@ -161,7 +161,7 @@ CHANNEL_LAYERS = {
 
 
 
-if env('DATABASE_PASSWORD', default=False):
+if env('DATABASE_PASSWORD'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -245,6 +245,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DEFAULT_FILE_STORAGE = 'chats.custom_azure.AzureMediaStorage'
+AZURE_ACCOUNT_NAME = env('AZURE_ACCOUNT_NAME')
+AZURE_ACCOUNT_KEY = env('AZURE_ACCOUNT_KEY')
+AZURE_CONTAINER = env('AZURE_CONTAINER')
 
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_ENDPOINT_SECRET = env('STRIPE_ENDPOINT_SECRET')
