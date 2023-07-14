@@ -25,6 +25,9 @@ class Integration(models.Model):
     whatsapp_token = models.CharField(max_length=255, blank=True, null=True)
     web_token = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return self.channel
+
 
 class Conversation(models.Model):
     name = models.CharField(max_length=255)

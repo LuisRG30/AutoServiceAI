@@ -3,7 +3,7 @@ from asgiref.sync import async_to_sync
 
 from django.core.cache import cache
 
-from .models import Conversation, Message, Document, Payment
+from .models import Integration, Conversation, Message, Document, Payment
 from .serializers import MessageSerializer
 from .mail import send_message_notification, send_document_upload_notification, send_document_requested_notification, send_payment_requested_notification, send_new_conversation_notification_admins
 
@@ -31,8 +31,8 @@ class ChatConsumer(JsonWebsocketConsumer):
             raise ValueError("Error getting ticket")
 
         self.accept()
-
-        conversation, created = Conversation.objects.get_or_create(name=self.conversation, user=suspected_user)
+        integration, created = Integration.objects.get_or_create(channel='integrated')
+        conversation, created = Conversation.objects.get_or_create(name=self.conversation, user=suspected_user, integration=integration)
         if created:
             send_new_conversation_notification_admins(conversation)
         async_to_sync(self.channel_layer.group_add)(
@@ -67,7 +67,10 @@ class ChatConsumer(JsonWebsocketConsumer):
                 from_user=self.scope["user"],
                 message=content["message"],
             )
-            if (last_message_in_conversation.created_at - message.created_at).total_seconds() > 3600:
+            if last_message_in_conversation:
+                if (last_message_in_conversation.created_at - message.created_at).total_seconds() > 3600:
+                    send_message_notification(message)
+            else:
                 send_message_notification(message)
             docs = content["documents"]
             if docs:
