@@ -123,7 +123,7 @@ ROOT_URLCONF = 'AutoServiceAI.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['chats/templates/, users/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -259,3 +259,6 @@ MY_GPT_URL = env('MY_GPT_URL')
 # Whatsapp API
 WHATSAPP_ACCESS_TOKEN = env('WHATSAPP_ACCESS_TOKEN')
 WHATSAPP_NUMBER_IDENTIFIER = env('WHATSAPP_NUMBER_IDENTIFIER')
+
+# Telegram API
+TELEGRAM_TOKEN = env('TELEGRAM_TOKEN')

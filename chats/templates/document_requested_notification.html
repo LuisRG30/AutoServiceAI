@@ -1,0 +1,62 @@
+{% autoescape off %}
+
+
+
+Hola,  {{user.email}}
+
+Se ha solicitado que se cargue el documento {{ document.name }}.
+
+{% endautoescape %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de Solicitud de Documento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #108ee9;
+            font-size: 24px;
+            line-height: 32px;
+            margin: 0 0 20px;
+        }
+
+        p {
+            color: #333333;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notificación de Solicitud de Documento</h1>
+        <p>Hola, {{user.first_name}},</p>
+        <p>Queremos informarte que se ha solicitado un documento.</p>
+        <p>Por favor, revisa los detalles de la solicitud a continuación:</p>
+        <ul style="text-align: left;">
+            <li><strong>Documento Solicitado:</strong> {{document.requirement}}</li>
+            <li><strong>Fecha de la Solicitud:</strong> {{document.created_at}}</li>
+        </ul>
+        <p>Si tienes alguna pregunta o necesitas más ayuda, no dudes en contactar a nuestro equipo de soporte.</p>
+        <p>Gracias por tu atención a este asunto.</p>
+        <p>Saludos cordiales,</p>
+        <p>Tu Equipo de Soporte</p>
+    </div>
+</body>
+</html>
