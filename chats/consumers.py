@@ -31,9 +31,11 @@ class ChatConsumer(JsonWebsocketConsumer):
             raise ValueError("Error getting ticket")
 
         self.accept()
-        integration, created = Integration.objects.get_or_create(channel='integrated')
-        conversation, created = Conversation.objects.get_or_create(name=self.conversation, user=suspected_user, integration=integration)
+        integration = Integration.objects.get(channel='integrated')
+        conversation, created = Conversation.objects.get_or_create(integration=integration, name=self.conversation)
         if created:
+            conversation.user = suspected_user
+            conversation.save()
             send_new_conversation_notification_admins(conversation)
         async_to_sync(self.channel_layer.group_add)(
             self.conversation, self.channel_name
