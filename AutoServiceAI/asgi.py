@@ -18,13 +18,12 @@ ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent
 sys.path.append(str(ROOT_DIR / "AutoServiceAI"))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "AutoServiceAI.settings")
+django.setup()
 
 #Import websocket url patterns
 from AutoServiceAI.routing import websocket_urlpatterns
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-
-django.setup()
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
