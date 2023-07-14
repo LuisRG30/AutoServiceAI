@@ -4,7 +4,7 @@ from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Conversation, Message, Document, Payment, Profile
+from .models import Integration, Conversation, Message, Document, Payment, Profile
 
 User = get_user_model()
 
@@ -90,11 +90,17 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ('id', 'conversation', 'from_user', 'message', 'read', 'image', 'document', 'payment', 'created_at')
 
+class IntegrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Integration
+        fields = ('channel', 'whatsapp_token', 'telegram_token', 'web_token')
+
 class ConversationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     last_message = MessageSerializer(read_only=True)
+    integration = Integration(read_only=True)
     class Meta:
         model = Conversation
-        fields = ('id', 'user', 'name', 'status', 'archived', 'autopilot' ,'created_at', 'updated_at', 'assigned_to', 'last_message')
+        fields = ('id', 'integration', 'user', 'name', 'status', 'archived', 'autopilot' ,'created_at', 'updated_at', 'assigned_to', 'last_message')
         read_only_fields = ('name',)
 
