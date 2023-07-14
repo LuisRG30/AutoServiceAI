@@ -10,12 +10,13 @@ from .mail import send_message_notification, send_document_upload_notification, 
 
 from channels.generic.websocket import JsonWebsocketConsumer
 
+
+
 class ChatConsumer(JsonWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.conversation = "luisrg3012.gmail.com"
-
+        self.conversation = None
     def connect(self):
         try:
             query_string = self.scope["query_string"].decode("utf-8")
