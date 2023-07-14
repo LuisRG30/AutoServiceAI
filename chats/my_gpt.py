@@ -9,9 +9,7 @@ def get_my_ai_response(past_messages):
     }
     try:
         r = requests.post(url, json=past_messages, headers=headers)
-        print(r.json())
         return r.json()
     except requests.exceptions.HTTPError as err:
-        print(err)
         return "Error"
         
