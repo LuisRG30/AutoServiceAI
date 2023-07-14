@@ -12,7 +12,7 @@ from users.models import User
 from .serializers import MessageSerializer
 from .mail import send_message_notification, send_document_upload_notification, send_document_requested_notification, send_payment_requested_notification, send_new_conversation_notification_admins, send_conversation_autopilot_deactivated
 
-from my_gpt import get_my_ai_response
+from .my_gpt import get_my_ai_response
 
 from channels.generic.websocket import JsonWebsocketConsumer
 
