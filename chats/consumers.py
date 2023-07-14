@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from django.core.cache import cache
 
 from .models import Integration, Conversation, Message, Document, Payment
+from users.models import User
 from .serializers import MessageSerializer
 from .mail import send_message_notification, send_document_upload_notification, send_document_requested_notification, send_payment_requested_notification, send_new_conversation_notification_admins
 
@@ -13,9 +14,10 @@ class ChatConsumer(JsonWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.conversation = None
+        self.conversation = "luisrg3012.gmail.com"
 
     def connect(self):
+        """
         try:
             query_string = self.scope["query_string"].decode("utf-8")
             query_params = dict(parse_qsl(query_string))
@@ -29,14 +31,22 @@ class ChatConsumer(JsonWebsocketConsumer):
         except:
             self.close()
             raise ValueError("Error getting ticket")
-
+        """
         self.accept()
-        integration = Integration.objects.get(channel='integrated')
-        conversation, created = Conversation.objects.get_or_create(integration=integration, name=self.conversation)
-        if created:
-            conversation.user = suspected_user
-            conversation.save()
-            send_new_conversation_notification_admins(conversation)
+        
+        """
+        try:
+            integration = Integration.objects.get(channel='integrated')
+            conversation, created = Conversation.objects.get_or_create(integration=integration, name=self.conversation)
+            if created:
+                conversation.user = User.objects.first()
+                conversation.save()
+                send_new_conversation_notification_admins(conversation)
+        except Exception:
+            pass
+        """    
+        
+        conversation = Conversation.objects.first()
         async_to_sync(self.channel_layer.group_add)(
             self.conversation, self.channel_name
         )
