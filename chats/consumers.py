@@ -47,6 +47,7 @@ class ChatConsumer(JsonWebsocketConsumer):
         """    
         
         conversation = Conversation.objects.first()
+        self.scope["user"] = conversation.user
         async_to_sync(self.channel_layer.group_add)(
             self.conversation, self.channel_name
         )
