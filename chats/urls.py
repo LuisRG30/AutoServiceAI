@@ -25,5 +25,7 @@ urlpatterns = [
     path('payments/<int:pk>/', views.PaymentDetailView.as_view(), name='payment'),
     path('documents/', views.DocumentsView.as_view(), name='documents'),
     path('create-payment-intent/', views.create_payment, name='create-payment-intent'),
-    path('webhook/', views.webhook, name='stripe-webhook')
+    path('webhook/', views.webhook, name='stripe-webhook'),
+    path('whatsapp-webhook/', views.whatsapp_webhook, name='whatsapp-webhook')
+
 ]

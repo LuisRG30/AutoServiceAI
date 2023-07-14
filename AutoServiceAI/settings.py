@@ -31,7 +31,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["anotherai.azurewebsites.net"]
 
 
 # Application definition
@@ -251,3 +251,11 @@ AZURE_CONTAINER = env('AZURE_CONTAINER')
 
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 STRIPE_ENDPOINT_SECRET = env('STRIPE_ENDPOINT_SECRET')
+
+# AI things
+AI_CONTEXT_SIZE = 50
+MY_GPT_URL = env('MY_GPT_URL')
+
+# Whatsapp API
+WHATSAPP_ACCESS_TOKEN = env('WHATSAPP_ACCESS_TOKEN')
+WHATSAPP_NUMBER_IDENTIFIER = env('WHATSAPP_NUMBER_IDENTIFIER')

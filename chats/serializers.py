@@ -63,7 +63,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('admin',)
+        fields = ('admin','AI')
 
 
 class UserSerializer(serializers.ModelSerializer):

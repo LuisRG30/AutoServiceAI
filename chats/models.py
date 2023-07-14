@@ -98,6 +98,8 @@ class Profile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        if self.AI:
+            return "AI"
         return self.user.email
 
 def create_profile(sender, instance, created, **kwargs):
