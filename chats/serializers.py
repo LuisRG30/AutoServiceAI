@@ -93,7 +93,7 @@ class MessageSerializer(serializers.ModelSerializer):
 class IntegrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Integration
-        fields = ('channel', 'whatsapp_token', 'telegram_token', 'web_token')
+        fields = ('id', 'channel', 'whatsapp_token', 'telegram_token', 'web_token')
 
 class ConversationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
