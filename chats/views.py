@@ -19,17 +19,18 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework.mixins import ListModelMixin
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from .models import Conversation, Message, Document, Payment, PaymentIntent, Profile
+from .models import Conversation, Message, Document, Payment, PaymentIntent, Profile, Integration
 from .serializers import RegisterSerializer, UserSerializer, ProfileSerializer, ConversationSerializer, MessageSerializer, DocumentSerializer, PaymentSerializer
 from .permissions import IsAdmin, IsAdminOrReadAuthenticated
 from .paginaters import MessagePagination
-from .mail import send_payment_success_mail, send_payment_notification_admins, send_document_upload_notification, send_conversation_assignment_notification, send_conversation_unassignment_notification, send_conversation_archive_change_notification
-
+from .my_gpt import get_my_ai_response
+from .mail import send_payment_success_mail, send_payment_notification_admins, send_document_upload_notification, send_conversation_assignment_notification, send_conversation_unassignment_notification, send_conversation_archive_change_notification, send_conversation_autopilot_deactivated
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_ENDPOINT_SECRET
@@ -408,3 +409,92 @@ def webhook(request):
             return Response({'error': 'Unexpected event type'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({'success': True}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', 'GET'])
+def whatsapp_webhook(request):
+    if request.method == 'GET':
+        verification = request.GET.get('hub.challenge')
+        return HttpResponse(verification, status=status.HTTP_200_OK, content_type='text/plain')
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        entries = data['entry']
+        for entry in entries:
+            changes = entry['changes']
+            for change in changes:
+                messages = change['value']['messages']
+                for message in messages:
+                    phone_number = message['from']
+                    whatsapp_integration = Integration.objects.get_or_create(channel='whatsapp')
+
+                    try:
+                        sender_user = User.objects.get(phone=phone_number)
+                    except User.DoesNotExist:
+                        sender_user = User.objects.create(phone=phone_number)
+                        
+                    conversation, created = Conversation.objects.get_or_create(name=phone_number,
+                                                                                integration=whatsapp_integration,
+                                                                                user=sender_user)
+                                                                                
+                    if conversation.integration.channel != 'whatsapp':
+                        return Response({'success': False}, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    new_message = Message.objects.create(
+                                        conversation=conversation,
+                                        from_user=conversation.user,
+                                        message=message['text']['body'],
+                                        read=False
+                                    )
+                    
+                    try:
+                        channel_layer = get_channel_layer()
+                        async_to_sync(channel_layer.group_send)(
+                            conversation.name,
+                            {
+                                'type': 'chat_message_echo',
+                                'sender': new_message.from_user.phone,
+                                'message': MessageSerializer(new_message).data
+                            }
+                        )
+                    except Exception as e:
+                        print(e)
+
+                    if conversation.autopilot:
+                        past_messages = Message.objects.filter(conversation=conversation).order_by('-created_at')[:settings.AI_CONTEXT_SIZE]
+                        past_messages = past_messages[::-1]
+                        past_messages = MessageSerializer(past_messages, many=True).data
+                        past_messages = json.dumps(past_messages)
+
+                        try:
+                            ai_response = get_my_ai_response(past_messages)
+                            ai_user = Profile.objects.get(AI=True).user
+                            ai_message = Message.objects.create(
+                                                conversation=conversation,
+                                                from_user=ai_user,
+                                                message=ai_response,
+                                                read=False
+                                            )
+                            
+                        except Exception as e:
+                            conversation.autopilot = False
+                            conversation.save()
+                            send_conversation_autopilot_deactivated(conversation)
+                        
+                        try:
+                            channel_layer = get_channel_layer()
+                            async_to_sync(channel_layer.group_send)(
+                                conversation.name,
+                                {
+                                    'type': 'chat_message_echo',
+                                    'sender': ai_user,
+                                    'message': MessageSerializer(ai_message).data
+                                }
+                            )
+                        except Exception as e:
+                            print(e)
+                            
+                    return Response({'success': True}, status=status.HTTP_200_OK)

@@ -47,6 +47,6 @@ class User(AbstractUser):
 
     def __str__(self):
         if not self.email:
-            return self.phone
+            return self.phone if self.phone else "AI"
         
         return self.email

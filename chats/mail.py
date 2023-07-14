@@ -145,3 +145,16 @@ def send_conversation_archive_change_notification(conversation):
     admins = Profile.objects.filter(admin=True)
     recipients = [admin.user.email for admin in admins]
     EmailThread(subject, template, recipients, context).start()
+
+def send_conversation_autopilot_deactivated(conversation):
+    subject = 'Autopilot desactivado'
+    template = 'conversation_autopilot_deactivated.html'
+
+    context = {
+        'user': conversation.user,
+        'domain': settings.SITE_DOMAIN,
+        'conversation': conversation,
+    }
+    admins = Profile.objects.filter(admin=True)
+    recipients = [admin.user.email for admin in admins]
+    EmailThread(subject, template, recipients, context).start()
