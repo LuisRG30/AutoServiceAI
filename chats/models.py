@@ -31,7 +31,7 @@ class Integration(models.Model):
 
 class Conversation(models.Model):
     name = models.CharField(max_length=255)
-    integration = models.OneToOneField(Integration, on_delete=models.CASCADE)
+    integration = models.ForeignKey(Integration, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, related_name="conversation", blank=True, null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="assigned_conversations")
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='inactive')
