@@ -17,7 +17,6 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.conversation = "luisrg3012.gmail.com"
 
     def connect(self):
-        """
         try:
             query_string = self.scope["query_string"].decode("utf-8")
             query_params = dict(parse_qsl(query_string))
@@ -31,10 +30,9 @@ class ChatConsumer(JsonWebsocketConsumer):
         except:
             self.close()
             raise ValueError("Error getting ticket")
-        """
         self.accept()
         
-        """
+
         try:
             integration = Integration.objects.get(channel='integrated')
             conversation, created = Conversation.objects.get_or_create(integration=integration, name=self.conversation)
@@ -44,10 +42,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 send_new_conversation_notification_admins(conversation)
         except Exception:
             pass
-        """    
         
-        conversation = Conversation.objects.first()
-        self.scope["user"] = conversation.user
         async_to_sync(self.channel_layer.group_add)(
             self.conversation, self.channel_name
         )
