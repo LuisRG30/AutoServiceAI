@@ -492,7 +492,6 @@ def whatsapp_webhook(request):
                         past_messages = Message.objects.filter(conversation=conversation).order_by('-created_at')[:settings.AI_CONTEXT_SIZE]
                         past_messages = past_messages[::-1]
                         past_messages = MessageSerializer(past_messages, many=True).data
-                        past_messages = json.dumps(past_messages)
 
                         try:
                             try:
@@ -588,7 +587,6 @@ def telegram_webhook(request):
             past_messages = Message.objects.filter(conversation=conversation).order_by('-created_at')[:settings.AI_CONTEXT_SIZE]
             past_messages = past_messages[::-1]
             past_messages = MessageSerializer(past_messages, many=True).data
-            past_messages = json.dumps(past_messages)
 
             try:
                 ai_response = get_my_ai_response(past_messages)
